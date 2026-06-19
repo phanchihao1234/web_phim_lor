@@ -19,9 +19,12 @@ import { countries, genres, listTabs, years } from "./catalog";
 import { compactText, getAllEpisodes, getCategoryGroups, getFirstEpisode } from "./utils";
 
 function parseRoute() {
-  const path = window.location.pathname.replace(/\/+$/, "") || "/";
+  const basePath = import.meta.env.BASE_URL.replace(/\/+$/, "");
+  const fullPath = window.location.pathname.replace(/\/+$/, "") || "/";
+  const path = fullPath.startsWith(basePath) ? fullPath.slice(basePath.length) : fullPath;
+  const cleanPath = path || "/";
   const params = new URLSearchParams(window.location.search);
-  const parts = path.split("/").filter(Boolean);
+  const parts = cleanPath.split("/").filter(Boolean);
   const page = Math.max(1, Number(params.get("page") || "1"));
 
   if (parts[0] === "film" && parts[1]) {
@@ -52,7 +55,9 @@ function parseRoute() {
 }
 
 function navigate(path) {
-  window.history.pushState({}, "", path);
+  const basePath = import.meta.env.BASE_URL.replace(/\/+$/, "");
+  const fullPath = basePath + path;
+  window.history.pushState({}, "", fullPath);
   window.dispatchEvent(new PopStateEvent("popstate"));
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
